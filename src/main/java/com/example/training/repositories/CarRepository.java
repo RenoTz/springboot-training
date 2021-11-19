@@ -27,10 +27,8 @@ public class CarRepository {
    * @return {@link CarEntity} instance
    */
   public CarEntity findOneByMatriculation(String matriculation) {
-    Query query = new Query();
-    query.addCriteria(Criteria.where("matriculation").is(matriculation));
     log.info("Attempting to find car with matriculation : {}", matriculation);
-    CarEntity carEntity = mongoTemplate.findOne(query, CarEntity.class);
+    CarEntity carEntity = mongoTemplate.findOne(getQuery(matriculation), CarEntity.class);
     if (Objects.nonNull(carEntity)) {
       log.info("Car found : {} - {} - {}", carEntity.getMatriculation(), carEntity.getBrand(),
           carEntity.getModel());
@@ -50,7 +48,7 @@ public class CarRepository {
   public CarEntity create(CarEntity car) throws AlreadyExistsException {
     CarEntity newCar;
     log.info("Attempting to create car");
-    if (Objects.isNull(findOneByMatriculation(car.getMatriculation()))) {
+    if (Objects.isNull(mongoTemplate.findOne(getQuery(car.getMatriculation()), CarEntity.class))) {
       newCar = mongoTemplate.insert(car);
       log.info("Car created : {} - {} - {}", car.getMatriculation(), car.getBrand(),
           car.getModel());
@@ -70,21 +68,21 @@ public class CarRepository {
    */
   public CarEntity createOrUpdate(CarEntity car) throws AlreadyExistsException {
     CarEntity newCar;
-    log.info("Attempting to create car");
-    CarEntity carRegistered = findOneByMatriculation(car.getMatriculation());
-    if (Objects.isNull(carRegistered)) {
-      newCar = mongoTemplate.insert(car);
-      log.info("Car created : {} - {} - {}", car.getMatriculation(), car.getBrand(),
-          car.getModel());
-    } else {
-      Query query = new Query();
-      query.addCriteria(Criteria.where("matriculation").is(car.getMatriculation()));
+    try {
+      newCar = create(car);
+    } catch (AlreadyExistsException e) {
       Update update = new Update().set("brand", car.getBrand()).set("model", car.getModel());
-      mongoTemplate.upsert(query, update, CarEntity.class);
+      mongoTemplate.upsert(getQuery(car.getMatriculation()), update, CarEntity.class);
       log.info("Car updated in database with matriculation : {}", car.getMatriculation());
-      throw new AlreadyExistsException("Car already exists in database");
+      throw e;
     }
     return newCar;
+  }
+
+  private Query getQuery(String matriculation) {
+    Query query = new Query();
+    query.addCriteria(Criteria.where("matriculation").is(matriculation));
+    return query;
   }
 
 }
