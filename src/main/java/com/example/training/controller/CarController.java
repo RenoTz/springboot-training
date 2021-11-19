@@ -1,5 +1,6 @@
 package com.example.training.controller;
 
+import com.example.training.errors.AlreadyExistsException;
 import com.example.training.model.CarResource;
 import com.example.training.services.CarService;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,23 @@ public class CarController {
   public ResponseEntity<Object> create(@RequestBody @Validated CarResource car) {
     try {
       return new ResponseEntity<>(carService.create(car), HttpStatus.CREATED);
-    } catch (Exception e) {
+    } catch (AlreadyExistsException e) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Register a user. Or update if already exists in database.
+   *
+   * @param car a {@link CarResource} to be registered
+   * @return a {@link CarResource} registered
+   */
+  @PutMapping
+  public ResponseEntity<Object> createOrUpdate(@RequestBody @Validated CarResource car) {
+    try {
+      return new ResponseEntity<>(carService.createOrUpdate(car), HttpStatus.CREATED);
+    } catch (AlreadyExistsException e) {
+      return ResponseEntity.ok().body(String.format("Car with matriculation %s was updated", car.getMatriculation()));
     }
   }
 

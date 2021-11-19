@@ -7,11 +7,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "Car")
 public class CarEntity {
 
-private String matriculation;
+    private String matriculation;
 
-private String model;
+    private String model;
 
-private String brand;
-
+    private String brand;
 
 }
