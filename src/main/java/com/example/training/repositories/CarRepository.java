@@ -45,7 +45,7 @@ public class CarRepository {
    *
    * @param car a {@link CarEntity} instance
    * @return {@link CarEntity} registered instance
-   * @throws Exception if user already exists in database
+   * @throws AlreadyExistsException if user already exists in database
    */
   public CarEntity create(CarEntity car) throws AlreadyExistsException {
     CarEntity newCar;
@@ -66,7 +66,7 @@ public class CarRepository {
    *
    * @param car a {@link CarEntity} instance
    * @return {@link CarEntity} registered instance
-   * @throws Exception if user already exists in database
+   * @throws AlreadyExistsException if user already exists in database
    */
   public CarEntity createOrUpdate(CarEntity car) throws AlreadyExistsException {
     CarEntity newCar;
